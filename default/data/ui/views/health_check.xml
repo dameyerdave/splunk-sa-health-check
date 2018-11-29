@@ -1,0 +1,26 @@
+<dashboard>
+  <label>Health Check</label>
+  <description>Checks the timeliness of hosts, sources and sourcetypes</description>
+  <row>
+    <panel>
+      <title>Overview</title>
+      <table>
+        <search>
+          <query>| `metadata` | `check_items` | `hr_duration("diffLastTime")`</query>
+          <earliest>0</earliest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+        <format type="color" field="ok">
+          <colorPalette type="map">{"0":#D93F3C,"1":#A2CC3E}</colorPalette>
+        </format>
+      </table>
+    </panel>
+  </row>
+</dashboard>

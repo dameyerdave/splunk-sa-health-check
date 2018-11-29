@@ -1,0 +1,7 @@
+<nav search_view="search" color="#00BFFF">
+    <view name="search" />
+    <view name="dashboards" />
+    <collection label="Health Check">
+        <view name="health_check" default="true" />
+    </collection>
+</nav>

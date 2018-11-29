@@ -1,2 +1,5 @@
 item,type,timeliness,interval
-linux,sourcetype,-4h,1h
+linux,sourcetype,-4h,hourly
+syslog,sourcetype,-4h,daily
+/var/log/auth.log,source,-223d,hourly
+dme-ubuntu,host,-4h,hourly
