@@ -1,13 +1,117 @@
-<dashboard>
+<form>
   <label>Health Check</label>
   <description>Checks the timeliness of hosts, sources and sourcetypes</description>
+  <fieldset submitButton="true" autoRun="false">
+    <input type="text" token="item" searchWhenChanged="true">
+      <label>Item</label>
+      <default>*</default>
+      <initialValue>*</initialValue>
+    </input>
+    <input type="multiselect" token="type" searchWhenChanged="true">
+      <label>Type</label>
+      <choice value="sourcetype">sourcetype</choice>
+      <choice value="source">source</choice>
+      <choice value="host">host</choice>
+      <search>
+        <query/>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </search>
+      <default>sourcetype,source,host</default>
+      <initialValue>sourcetype,source,host</initialValue>
+      <valuePrefix>"</valuePrefix>
+      <valueSuffix>"</valueSuffix>
+      <delimiter> ,</delimiter>
+      <prefix>(</prefix>
+      <suffix>)</suffix>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <title>Number of monitored items</title>
+      <single>
+        <search>
+          <query>| `metadata` | `check_items` | `hr_duration("noEventsSince")` | search item=* | where type in $type$ | stats count</query>
+          <earliest>0</earliest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="colorMode">block</option>
+        <option name="drilldown">none</option>
+        <option name="rangeColors">["0x65a637","0xd93f3c"]</option>
+        <option name="rangeValues">[0]</option>
+        <option name="useColors">0</option>
+      </single>
+    </panel>
+    <panel>
+      <title>Number of out dated items</title>
+      <single>
+        <search>
+          <query>| `metadata` | `check_items` | `hr_duration("noEventsSince")` | search item=* | where type in $type$ | where ok=0 | stats count</query>
+          <earliest>0</earliest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="colorMode">block</option>
+        <option name="drilldown">none</option>
+        <option name="rangeColors">["0x65a637","0xd93f3c"]</option>
+        <option name="rangeValues">[0]</option>
+        <option name="useColors">1</option>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel id="tools_panel">
+      <title>Tools</title>
+      <html>
+        <style>
+          #tools_panel {
+            width: 30% !important;
+          }
+          #lookup_error_panel {
+            width: 70% !important;
+          }
+          #lookup_error_panel .panel-title {
+            color: #ffffff;
+            background-color: #ff0000;
+          }
+        </style>
+        <a class="btn btn-default" target="_blank" href="/app/lookup_editor/lookup_edit?owner=nobody&amp;namespace=SA-health-check&amp;lookup=checkitems.csv&amp;type=csv">Edit Lookup</a>
+        <a class="btn btn-default" target="_blank" href="/app/SplunkEnterpriseSecuritySuite/ess_content_management?appFilter=SA-health-check">Edit Correlation Searches</a>
+      </html>
+    </panel>
+    <panel depends="$show_lookup_errors$" id="lookup_error_panel">
+      <title>Lookup Errors</title>
+      <table>
+        <search>
+          <query>| `check_lookup`</query>
+          <earliest>0</earliest>
+          <sampleRatio>1</sampleRatio>
+          <progress>
+            <condition match="'job.resultCount' &gt; 0">
+              <set token="show_lookup_errors"></set>
+            </condition>
+            <condition>
+              <unset token="show_lookup_errors">true</unset>
+            </condition>
+          </progress>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
   <row>
     <panel>
       <title>Overview</title>
       <table>
         <search>
-          <query>| `metadata` | `check_items` | `hr_duration("diffLastTime")`</query>
+          <query>| `metadata` | `check_items` | `hr_duration("noEventsSince")` | search item=$item$ | where type in $type$ | sort - noEventsSince</query>
           <earliest>0</earliest>
+          <latest></latest>
           <sampleRatio>1</sampleRatio>
         </search>
         <option name="count">20</option>
@@ -23,4 +127,70 @@
       </table>
     </panel>
   </row>
-</dashboard>
+  <row>
+    <panel>
+      <html>
+        <hr/>
+      </html>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Not checked sourcetypes</title>
+      <table>
+        <search>
+          <query>| `not_checked_items_by_type("sourcetype")` | search sourcetype=$item$</query>
+          <earliest>0</earliest>
+          <latest></latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+    <panel>
+      <title>Not checked sources</title>
+      <table>
+        <search>
+          <query>| `not_checked_items_by_type("source")` | search source=$item$</query>
+          <earliest>0</earliest>
+          <latest></latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+    <panel>
+      <title>Not checked hosts</title>
+      <table>
+        <search>
+          <query>| `not_checked_items_by_type("host")` | search host=$item$</query>
+          <earliest>0</earliest>
+          <latest></latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+</form>

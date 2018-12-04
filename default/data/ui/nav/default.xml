@@ -3,5 +3,6 @@
     <view name="dashboards" />
     <collection label="Health Check">
         <view name="health_check" default="true" />
+        <a target="_blank" href="/app/lookup_editor/lookup_edit?owner=nobody&amp;namespace=SA-health-check&amp;lookup=checkitems.csv&amp;type=csv">Edit Lookup</a>
     </collection>
 </nav>

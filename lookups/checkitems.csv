@@ -3,3 +3,8 @@ linux,sourcetype,-4h,hourly
 syslog,sourcetype,-4h,daily
 /var/log/auth.log,source,-223d,hourly
 dme-ubuntu,host,-4h,hourly
+WinEventLog:Security,sourcetype,-4h,hourly
+WinEventLog:Application,source,-4h,hourly
+WinEventLog:Security,source,-4h,hourly
+WinEventLog:System,sourcetype,-4h,hourly
+DESKTOP-MGJC8S6,host,-2h,hourly
