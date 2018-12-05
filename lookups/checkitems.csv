@@ -8,3 +8,15 @@ WinEventLog:Application,source,-4h,hourly
 WinEventLog:Security,source,-4h,hourly
 WinEventLog:System,sourcetype,-4h,hourly
 DESKTOP-MGJC8S6,host,-2h,hourly
+cisco_ise,sourcetype,-24h,daily
+main,index,-4h,hourly
+local_test,index,-4h,hourly
+exchange,index,-4h,hourly
+mongo,index,-4h,hourly
+firewall,index,-4h,daily
+identity,index,-4h,daily
+local,index,-4h,daily
+save_log,index,-4h,daily
+summary,index,-4h,daily
+test_log,index,-4h,daily
+/Users/dme/test.log,source,-24h,daily

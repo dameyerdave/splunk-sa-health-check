@@ -1,6 +1,6 @@
 <form>
   <label>Health Check</label>
-  <description>Checks the timeliness of hosts, sources and sourcetypes</description>
+  <description>Checks the timeliness of indexes, hosts, sources and sourcetypes</description>
   <fieldset submitButton="true" autoRun="false">
     <input type="text" token="item" searchWhenChanged="true">
       <label>Item</label>
@@ -9,16 +9,17 @@
     </input>
     <input type="multiselect" token="type" searchWhenChanged="true">
       <label>Type</label>
-      <choice value="sourcetype">sourcetype</choice>
-      <choice value="source">source</choice>
+      <choice value="index">index</choice>
       <choice value="host">host</choice>
+      <choice value="source">source</choice>
+      <choice value="sourcetype">sourcetype</choice>
       <search>
         <query/>
         <earliest>-24h@h</earliest>
         <latest>now</latest>
       </search>
-      <default>sourcetype,source,host</default>
-      <initialValue>sourcetype,source,host</initialValue>
+      <default>sourcetype,source,host,index</default>
+      <initialValue>sourcetype,source,host,index</initialValue>
       <valuePrefix>"</valuePrefix>
       <valueSuffix>"</valueSuffix>
       <delimiter> ,</delimiter>
@@ -27,26 +28,56 @@
     </input>
   </fieldset>
   <row>
-    <panel>
-      <title>Number of monitored items</title>
-      <single>
+    <panel id="tools_panel">
+      <title>Configuration</title>
+      <html>
+        <style>
+          #tools_panel {
+            width: 15% !important;
+          }
+          #tools_panel .btn {
+            margin: 5px !important;
+            width: 140px !important;
+          }
+          #indicator_panel_1 {
+            width: 30% !important;
+          }
+          #indicator_panel_2 {
+            width: 15% !important;
+          }
+          #lookup_error_panel {
+            width: 40% !important;
+          }
+          #lookup_error_panel .panel-title {
+            color: #ffffff;
+            background-color: #ff0000;
+          }
+        </style>
+        <a class="btn btn-default" target="_blank" href="/app/lookup_editor/lookup_edit?owner=nobody&amp;namespace=SA-health-check&amp;lookup=checkitems.csv&amp;type=csv">Edit Lookup</a>
+        <br/>
+        <a class="btn btn-default" target="_blank" href="/app/SplunkEnterpriseSecuritySuite/ess_content_management?appFilter=SA-health-check">Edit Correlation Searches</a>
+      </html>
+    </panel>
+    <panel id="indicator_panel_1">
+      <title>Monitored items</title>
+      <chart>
         <search>
-          <query>| `metadata` | `check_items` | `hr_duration("noEventsSince")` | search item=* | where type in $type$ | stats count</query>
+          <query>| `metadata` | `check_items` | `hr_duration("noEventsSince")` | search item=$item$ | where type in $type$ | stats count by ok | replace 1 WITH "Ok", 0 WITH "Outdated" IN ok</query>
           <earliest>0</earliest>
+          <latest></latest>
           <sampleRatio>1</sampleRatio>
         </search>
-        <option name="colorMode">block</option>
-        <option name="drilldown">none</option>
-        <option name="rangeColors">["0x65a637","0xd93f3c"]</option>
-        <option name="rangeValues">[0]</option>
-        <option name="useColors">0</option>
-      </single>
+        <option name="charting.chart">pie</option>
+        <option name="charting.drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="charting.fieldColors">{"Outdated":#D93F3C,"Ok":#A2CC3E}</option>
+      </chart>
     </panel>
-    <panel>
-      <title>Number of out dated items</title>
+    <panel id="indicator_panel_2">
+      <title>Outdated items</title>
       <single>
         <search>
-          <query>| `metadata` | `check_items` | `hr_duration("noEventsSince")` | search item=* | where type in $type$ | where ok=0 | stats count</query>
+          <query>| `metadata` | `check_items` | `hr_duration("noEventsSince")` | search item=$item$ | where type in $type$ | where ok=0 | stats count</query>
           <earliest>0</earliest>
           <sampleRatio>1</sampleRatio>
         </search>
@@ -56,27 +87,6 @@
         <option name="rangeValues">[0]</option>
         <option name="useColors">1</option>
       </single>
-    </panel>
-  </row>
-  <row>
-    <panel id="tools_panel">
-      <title>Tools</title>
-      <html>
-        <style>
-          #tools_panel {
-            width: 30% !important;
-          }
-          #lookup_error_panel {
-            width: 70% !important;
-          }
-          #lookup_error_panel .panel-title {
-            color: #ffffff;
-            background-color: #ff0000;
-          }
-        </style>
-        <a class="btn btn-default" target="_blank" href="/app/lookup_editor/lookup_edit?owner=nobody&amp;namespace=SA-health-check&amp;lookup=checkitems.csv&amp;type=csv">Edit Lookup</a>
-        <a class="btn btn-default" target="_blank" href="/app/SplunkEnterpriseSecuritySuite/ess_content_management?appFilter=SA-health-check">Edit Correlation Searches</a>
-      </html>
     </panel>
     <panel depends="$show_lookup_errors$" id="lookup_error_panel">
       <title>Lookup Errors</title>
@@ -109,7 +119,7 @@
       <title>Overview</title>
       <table>
         <search>
-          <query>| `metadata` | `check_items` | `hr_duration("noEventsSince")` | search item=$item$ | where type in $type$ | sort - noEventsSince</query>
+          <query>| `metadata` | `check_items` | `hr_duration("noEventsSince")` | search item=$item$ | where type in $type$ | sort - noEventsSince | replace 1 WITH "Ok", 0 WITH "Outdated" IN ok</query>
           <earliest>0</earliest>
           <latest></latest>
           <sampleRatio>1</sampleRatio>
@@ -122,7 +132,7 @@
         <option name="totalsRow">false</option>
         <option name="wrap">true</option>
         <format type="color" field="ok">
-          <colorPalette type="map">{"0":#D93F3C,"1":#A2CC3E}</colorPalette>
+          <colorPalette type="map">{"Outdated":#D93F3C,"Ok":#A2CC3E}</colorPalette>
         </format>
       </table>
     </panel>
@@ -132,6 +142,46 @@
       <html>
         <hr/>
       </html>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Not checked indexes</title>
+      <table>
+        <search>
+          <query>| `not_checked_items_by_type("index")` | search index=$item$</query>
+          <earliest>0</earliest>
+          <latest></latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+    <panel>
+      <title>Not checked hosts</title>
+      <table>
+        <search>
+          <query>| `not_checked_items_by_type("host")` | search host=$item$</query>
+          <earliest>0</earliest>
+          <latest></latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
     </panel>
   </row>
   <row>
@@ -159,25 +209,6 @@
       <table>
         <search>
           <query>| `not_checked_items_by_type("source")` | search source=$item$</query>
-          <earliest>0</earliest>
-          <latest></latest>
-          <sampleRatio>1</sampleRatio>
-        </search>
-        <option name="count">20</option>
-        <option name="dataOverlayMode">none</option>
-        <option name="drilldown">none</option>
-        <option name="percentagesRow">false</option>
-        <option name="refresh.display">progressbar</option>
-        <option name="rowNumbers">false</option>
-        <option name="totalsRow">false</option>
-        <option name="wrap">true</option>
-      </table>
-    </panel>
-    <panel>
-      <title>Not checked hosts</title>
-      <table>
-        <search>
-          <query>| `not_checked_items_by_type("host")` | search host=$item$</query>
           <earliest>0</earliest>
           <latest></latest>
           <sampleRatio>1</sampleRatio>

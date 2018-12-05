@@ -1,8 +1,10 @@
 <nav search_view="search" color="#00BFFF">
+    <view name="health_check" default="true" />
     <view name="search" />
-    <view name="dashboards" />
-    <collection label="Health Check">
-        <view name="health_check" default="true" />
+    <a target="_blank" href="/alerts/SA-health-check">Triggered Alerts</a>
+    <collection label="Configuration">
         <a target="_blank" href="/app/lookup_editor/lookup_edit?owner=nobody&amp;namespace=SA-health-check&amp;lookup=checkitems.csv&amp;type=csv">Edit Lookup</a>
+        <a target="_blank" href="/app/SplunkEnterpriseSecuritySuite/ess_content_management?appFilter=SA-health-check">Edit Correlation Searches</a>
+        <view name="alerts" />
     </collection>
 </nav>
